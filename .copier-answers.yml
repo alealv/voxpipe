@@ -1,0 +1,19 @@
+# Changes here will be overwritten by Copier.
+_commit: 1.11.2
+_src_path: /Users/aalvarez/Projects/copier-uv
+author_email: alegasalv@gmail.com
+author_fullname: Alejandro Gaston Alvarez Franceschi
+author_username: alealv
+copyright_date: '2025'
+copyright_holder: Alejandro Gaston Alvarez Franceschi
+copyright_holder_email: alegasalv@gmail.com
+copyright_license: LGPL-3.0
+project_description: Audio pipeline for videos
+project_name: voxpipe
+python_package_command_line_name: voxpipe
+python_package_distribution_name: voxpipe
+python_package_import_name: voxpipe
+repository_name: voxpipe
+repository_namespace: alealv
+repository_provider: github.com
+
