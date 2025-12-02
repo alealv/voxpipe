@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from voxpipe.utils.cleaning import remove_repeated_segments
 from voxpipe.utils.io import read_json, write_json
 
 
@@ -124,9 +125,12 @@ def merge_transcript(
                     }
                 )
 
+    # Remove hallucination loops (repeated segments)
+    cleaned_segments = remove_repeated_segments(merged_segments)
+
     # Consolidate consecutive segments from same speaker
     consolidated: list[dict[str, Any]] = []
-    for seg in merged_segments:
+    for seg in cleaned_segments:
         if consolidated and consolidated[-1]["speaker"] == seg["speaker"]:
             consolidated[-1]["end"] = seg["end"]
             consolidated[-1]["text"] += " " + seg["text"]

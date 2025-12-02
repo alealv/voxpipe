@@ -83,11 +83,28 @@ def transcribe(
     whisper_model: Annotated[
         Optional[Path], typer.Option("--model", "-m", help="Whisper model path")
     ] = None,
+    language: Annotated[
+        Optional[str], typer.Option("--lang", "-l", help="Language code (e.g., 'en', 'de')")
+    ] = None,
+    max_len: Annotated[
+        int, typer.Option("--max-len", help="Max segment length in chars (0=unlimited)")
+    ] = 0,
+    no_context: Annotated[
+        bool, typer.Option("--no-context", help="Disable context to prevent hallucination loops")
+    ] = False,
 ) -> None:
     """Transcribe audio with Whisper."""
     from voxpipe.core.transcription import transcribe as do_transcribe
 
-    result = do_transcribe(audio, output, whisper_bin, whisper_model)
+    result = do_transcribe(
+        audio,
+        output,
+        whisper_bin,
+        whisper_model,
+        language=language,
+        max_len=max_len,
+        no_context=no_context,
+    )
     typer.echo(f"Transcript saved to: {result}")
 
 

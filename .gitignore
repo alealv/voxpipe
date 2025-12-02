@@ -23,3 +23,10 @@ uv.lock
 .mypy_cache/
 .ruff_cache/
 __pycache__/
+
+# audio/video files
+*.wav
+*.mp3
+*.mp4
+*.mkv
+*.avi

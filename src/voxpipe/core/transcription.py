@@ -14,6 +14,12 @@ def transcribe(
     output_path: Path | str,
     whisper_bin: Path | None = None,
     whisper_model: Path | None = None,
+    language: str | None = None,
+    max_len: int = 0,
+    no_context: bool = False,
+    entropy_threshold: float = 2.4,
+    logprob_threshold: float = -1.0,
+    no_timestamps: bool = False,
 ) -> Path:
     """Transcribe audio file using whisper-cli.
 
@@ -22,6 +28,12 @@ def transcribe(
         output_path: Path to output JSON file (without extension).
         whisper_bin: Path to whisper-cli binary (default from config).
         whisper_model: Path to whisper model (default from config).
+        language: Language code (e.g., 'en', 'de'). Auto-detect if None.
+        max_len: Maximum segment length in characters (0 = no limit).
+        no_context: Disable previous context to prevent hallucination loops.
+        entropy_threshold: Entropy threshold for decoder fail (default 2.4).
+        logprob_threshold: Log probability threshold for decoder fail (default -1.0).
+        no_timestamps: Disable timestamp output.
 
     Returns:
         Path to the transcript JSON file.
@@ -48,7 +60,24 @@ def transcribe(
         "-oj",  # Output JSON
         "-of",
         str(output_path),
+        # Anti-hallucination parameters
+        "-et",
+        str(entropy_threshold),
+        "-lpt",
+        str(logprob_threshold),
     ]
+
+    if language:
+        cmd.extend(["-l", language])
+
+    if max_len > 0:
+        cmd.extend(["-ml", str(max_len)])
+
+    if no_context:
+        cmd.append("-nc")
+
+    if no_timestamps:
+        cmd.append("-nt")
 
     print(f"Transcribing: {audio_path}", file=sys.stderr)
     subprocess.run(cmd, check=True)
