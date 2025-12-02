@@ -2,41 +2,55 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
+from rich.console import Console
+from rich.panel import Panel
 
 from voxpipe._internal import debug
 
 PIPELINE_DIAGRAM = """\
-Pipeline Flow:
+┌─────────────────────────────────────────────────────────────┐
+│                      Pipeline Flow                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌───────┐   ┌─────────┐   ┌───────┐   ┌───────────┐       │
+│  │ Video │──▶│ Extract │──▶│ Audio │──▶│Transcribe │       │
+│  └───────┘   └─────────┘   └───────┘   └─────┬─────┘       │
+│                                              │              │
+│                                              ▼              │
+│  ┌─────────┐   ┌───────┐   ┌─────────┐   ┌─────────┐       │
+│  │ Diarize │──▶│ Merge │──▶│ Correct │──▶│Translate│       │
+│  └─────────┘   └───────┘   └─────────┘   └────┬────┘       │
+│                                               │             │
+│                                               ▼             │
+│                            ┌────────┐   ┌─────────┐        │
+│                            │ Export │──▶│ SRT/VTT │        │
+│                            └────────┘   └─────────┘        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘"""
 
-  Video --> Extract --> Audio --> Transcribe
-                                      |
-                                      v
-  Diarize --> Merge --> Correct --> Translate
-                                      |
-                                      v
-                        Export --> SRT/VTT
+console = Console()
 
-Commands:
-  extract      Extract audio from video (FFmpeg)
-  transcribe   Speech-to-text (whisper-cli)
-  diarize      Speaker identification (pyannote)
-  merge        Combine transcript + speakers
-  correct      Fix ASR errors (Ollama)
-  translate    Translate to target language (Ollama)
-  export       Generate SRT/VTT subtitles
 
-  pipeline run    Run full pipeline (all steps)
-  pipeline quick  Quick transcription only
-"""
+def show_help_with_diagram(ctx: typer.Context, param: typer.CallbackParam, value: bool) -> None:
+    """Show help with pipeline diagram."""
+    if value:
+        # Print standard help
+        typer.echo(ctx.get_help())
+        # Print diagram
+        console.print()
+        console.print(PIPELINE_DIAGRAM, highlight=False)
+        raise typer.Exit()
+
 
 app = typer.Typer(
     name="voxpipe",
     help="Video/audio processing pipeline with transcription, diarization, and translation.",
-    no_args_is_help=True,
+    add_completion=False,
 )
 
 
@@ -54,15 +68,9 @@ def debug_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def diagram_callback(value: bool) -> None:
-    """Print pipeline diagram and exit."""
-    if value:
-        print(PIPELINE_DIAGRAM)
-        raise typer.Exit()
-
-
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main(
+    ctx: typer.Context,
     version: Annotated[
         bool,
         typer.Option(
@@ -82,17 +90,24 @@ def main(
             help="Print debug information.",
         ),
     ] = False,
-    diagram: Annotated[
+    help_flag: Annotated[
         bool,
         typer.Option(
-            "--diagram",
-            callback=diagram_callback,
+            "--help",
+            "-h",
+            callback=show_help_with_diagram,
             is_eager=True,
-            help="Show pipeline flow diagram.",
+            help="Show this message and exit.",
         ),
     ] = False,
 ) -> None:
     """Voxpipe - Video/audio processing pipeline."""
+    if ctx.invoked_subcommand is None:
+        # No command given, show help with diagram
+        typer.echo(ctx.get_help())
+        console.print()
+        console.print(PIPELINE_DIAGRAM, highlight=False)
+        raise typer.Exit()
 
 
 # --- Extract Command ---
