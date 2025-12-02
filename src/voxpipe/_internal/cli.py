@@ -18,9 +18,8 @@ PIPELINE_DIAGRAM = """\
 ├────────────────────────────────────────────────────────┤
 │                                                        │
 │  Video ─→ Extract ─→ Audio ─┬─→ Transcribe ─┐          │
-│                             │               │          │
-│                             └─→ Diarize ────┴─→ Merge  │
-│                                                  │     │
+│                             │               ├─→ Merge  │
+│                             └─→ Diarize ────┘    │     │
 │                                                  ↓     │
 │            SRT/VTT ←─ Export ←─ Translate ←─ Correct   │
 │                                                        │
