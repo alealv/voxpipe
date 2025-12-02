@@ -17,13 +17,12 @@ PIPELINE_DIAGRAM = """\
 │                     Pipeline Flow                      │
 ├────────────────────────────────────────────────────────┤
 │                                                        │
-│  Video ─→ Extract ─→ Audio ─→ Transcribe               │
-│                                    │                   │
-│                                    ↓                   │
-│  Diarize ─→ Merge ─→ Correct ─→ Translate              │
-│                                     │                  │
-│                                     ↓                  │
-│                      Export ─→ SRT/VTT                 │
+│  Video ─→ Extract ─→ Audio ─┬─→ Transcribe ─┐          │
+│                             │               │          │
+│                             └─→ Diarize ────┴─→ Merge  │
+│                                                  │     │
+│                                                  ↓     │
+│            SRT/VTT ←─ Export ←─ Translate ←─ Correct   │
 │                                                        │
 └────────────────────────────────────────────────────────┘"""
 
