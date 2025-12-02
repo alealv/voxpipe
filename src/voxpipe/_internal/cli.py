@@ -9,7 +9,7 @@ import typer
 
 from voxpipe._internal import debug
 
-PIPELINE_DIAGRAM = """
+PIPELINE_DIAGRAM = """\
 Pipeline Flow:
 
   Video --> Extract --> Audio --> Transcribe
@@ -37,7 +37,6 @@ app = typer.Typer(
     name="voxpipe",
     help="Video/audio processing pipeline with transcription, diarization, and translation.",
     no_args_is_help=True,
-    epilog=PIPELINE_DIAGRAM,
 )
 
 
@@ -52,6 +51,13 @@ def debug_callback(value: bool) -> None:
     """Print debug info and exit."""
     if value:
         debug._print_debug_info()
+        raise typer.Exit()
+
+
+def diagram_callback(value: bool) -> None:
+    """Print pipeline diagram and exit."""
+    if value:
+        print(PIPELINE_DIAGRAM)
         raise typer.Exit()
 
 
@@ -74,6 +80,15 @@ def main(
             callback=debug_callback,
             is_eager=True,
             help="Print debug information.",
+        ),
+    ] = False,
+    diagram: Annotated[
+        bool,
+        typer.Option(
+            "--diagram",
+            callback=diagram_callback,
+            is_eager=True,
+            help="Show pipeline flow diagram.",
         ),
     ] = False,
 ) -> None:
@@ -250,7 +265,6 @@ def export_vtt(
 # --- Pipeline Command ---
 pipeline_app = typer.Typer(
     help="Run complete processing pipelines.",
-    epilog=PIPELINE_DIAGRAM,
 )
 app.add_typer(pipeline_app, name="pipeline")
 
