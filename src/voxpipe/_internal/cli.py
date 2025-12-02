@@ -114,13 +114,19 @@ def diarize(
     audio: Annotated[Path, typer.Argument(help="Input audio file")],
     output: Annotated[Path, typer.Argument(help="Output JSON file")],
     speakers: Annotated[
-        Optional[int], typer.Option("--speakers", "-s", help="Number of speakers")
+        Optional[int], typer.Option("--speakers", "-s", help="Exact number of speakers")
+    ] = None,
+    min_speakers: Annotated[
+        Optional[int], typer.Option("--min", help="Minimum number of speakers")
+    ] = None,
+    max_speakers: Annotated[
+        Optional[int], typer.Option("--max", help="Maximum number of speakers")
     ] = None,
 ) -> None:
     """Run speaker diarization on audio file."""
     from voxpipe.core.diarization import run_diarization
 
-    run_diarization(audio, output, speakers)
+    run_diarization(audio, output, speakers, min_speakers, max_speakers)
     typer.echo(f"Diarization saved to: {output}")
 
 

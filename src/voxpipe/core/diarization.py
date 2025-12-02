@@ -18,6 +18,8 @@ def run_diarization(
     audio_path: Path | str,
     output_path: Path | str,
     num_speakers: int | None = None,
+    min_speakers: int | None = None,
+    max_speakers: int | None = None,
     hf_token: str | None = None,
 ) -> dict[str, Any]:
     """Run speaker diarization on audio file.
@@ -25,7 +27,9 @@ def run_diarization(
     Args:
         audio_path: Path to input audio file.
         output_path: Path to output JSON file.
-        num_speakers: Number of speakers (auto-detect if None).
+        num_speakers: Exact number of speakers (auto-detect if None).
+        min_speakers: Minimum number of speakers (for auto-detection).
+        max_speakers: Maximum number of speakers (for auto-detection).
         hf_token: Hugging Face token (default from config/env).
 
     Returns:
@@ -64,6 +68,10 @@ def run_diarization(
     diarization_kwargs: dict[str, Any] = {"hook": progress_hook}
     if num_speakers:
         diarization_kwargs["num_speakers"] = num_speakers
+    if min_speakers:
+        diarization_kwargs["min_speakers"] = min_speakers
+    if max_speakers:
+        diarization_kwargs["max_speakers"] = max_speakers
 
     diarization = pipeline(str(audio_path), **diarization_kwargs)  # type: ignore[misc]
     print("\n\nDiarization complete!", file=sys.stderr)
