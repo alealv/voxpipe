@@ -10,27 +10,17 @@ import typer
 from voxpipe._internal import debug
 
 PIPELINE_DIAGRAM = """
-[bold]Pipeline Flow:[/bold]
+Pipeline Flow:
 
-  ┌─────────┐    ┌─────────────┐    ┌──────────┐    ┌───────────┐
-  │  Video  │───▶│   Extract   │───▶│  Audio   │───▶│Transcribe │
-  └─────────┘    └─────────────┘    └──────────┘    └─────┬─────┘
-                                                          │
-                       ┌──────────────────────────────────┘
-                       │
-                       ▼
-  ┌──────────┐    ┌────────┐    ┌─────────┐    ┌───────────┐
-  │ Diarize  │───▶│ Merge  │───▶│ Correct │───▶│ Translate │
-  └──────────┘    └────────┘    └─────────┘    └─────┬─────┘
-                                                      │
-                       ┌──────────────────────────────┘
-                       │
-                       ▼
-                ┌────────────┐    ┌─────────┐
-                │   Export   │───▶│ SRT/VTT │
-                └────────────┘    └─────────┘
+  Video --> Extract --> Audio --> Transcribe
+                                      |
+                                      v
+  Diarize --> Merge --> Correct --> Translate
+                                      |
+                                      v
+                        Export --> SRT/VTT
 
-[bold]Commands:[/bold]
+Commands:
   extract      Extract audio from video (FFmpeg)
   transcribe   Speech-to-text (whisper-cli)
   diarize      Speaker identification (pyannote)
@@ -47,7 +37,6 @@ app = typer.Typer(
     name="voxpipe",
     help="Video/audio processing pipeline with transcription, diarization, and translation.",
     no_args_is_help=True,
-    rich_markup_mode="rich",
     epilog=PIPELINE_DIAGRAM,
 )
 
@@ -261,7 +250,6 @@ def export_vtt(
 # --- Pipeline Command ---
 pipeline_app = typer.Typer(
     help="Run complete processing pipelines.",
-    rich_markup_mode="rich",
     epilog=PIPELINE_DIAGRAM,
 )
 app.add_typer(pipeline_app, name="pipeline")
