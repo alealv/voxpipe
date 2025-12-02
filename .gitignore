@@ -30,3 +30,8 @@ __pycache__/
 *.mp4
 *.mkv
 *.avi
+
+# output files
+output.json
+*.srt
+*.vtt
