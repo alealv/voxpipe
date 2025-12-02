@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,53 @@ from voxpipe.config import config
 from voxpipe.utils.device import device_name, get_best_device
 from voxpipe.utils.io import write_json
 from voxpipe.utils.progress import progress_hook
+
+PIPELINE_MODEL = "pyannote/speaker-diarization-3.1"
+
+
+def load_pipeline(hf_token: str | None = None) -> Pipeline:
+    """Load the pyannote speaker diarization pipeline.
+
+    Tries to load from local cache first. If not available and a token
+    is provided, downloads from Hugging Face Hub.
+
+    Args:
+        hf_token: Hugging Face token for downloading models.
+
+    Returns:
+        Loaded Pipeline instance.
+
+    Raises:
+        RuntimeError: If pipeline cannot be loaded.
+    """
+    # Try loading from cache first (offline mode)
+    try:
+        print("Loading pyannote pipeline from cache...", file=sys.stderr)
+        pipeline = Pipeline.from_pretrained(
+            PIPELINE_MODEL,
+            local_files_only=True,
+        )
+        if pipeline is not None:
+            return pipeline
+    except Exception:
+        pass  # Cache miss, try downloading
+
+    # Try downloading with token
+    if hf_token:
+        print("Downloading pyannote pipeline from Hugging Face...", file=sys.stderr)
+        pipeline = Pipeline.from_pretrained(
+            PIPELINE_MODEL,
+            use_auth_token=hf_token,
+        )
+        if pipeline is not None:
+            return pipeline
+
+    msg = (
+        "Failed to load pyannote pipeline. "
+        "Either download models first with HF_TOKEN set, "
+        "or ensure models are cached in ~/.cache/torch/pyannote/"
+    )
+    raise RuntimeError(msg)
 
 
 def run_diarization(
@@ -30,31 +78,17 @@ def run_diarization(
         num_speakers: Exact number of speakers (auto-detect if None).
         min_speakers: Minimum number of speakers (for auto-detection).
         max_speakers: Maximum number of speakers (for auto-detection).
-        hf_token: Hugging Face token (default from config/env).
+        hf_token: Hugging Face token for downloading models (optional if cached).
 
     Returns:
         Diarization result dictionary.
-
-    Raises:
-        ValueError: If HF_TOKEN is not set.
     """
     audio_path = Path(audio_path)
     output_path = Path(output_path)
-    hf_token = hf_token or config.hf_token
+    hf_token = hf_token or config.hf_token or os.environ.get("HF_TOKEN")
 
-    if not hf_token:
-        msg = "HF_TOKEN environment variable not set"
-        raise ValueError(msg)
-
-    # Load pipeline
-    print("Loading pyannote speaker diarization pipeline...", file=sys.stderr)
-    pipeline = Pipeline.from_pretrained(
-        "pyannote/speaker-diarization-3.1",
-        use_auth_token=hf_token,
-    )
-    if pipeline is None:
-        msg = "Failed to load pyannote pipeline"
-        raise RuntimeError(msg)
+    # Load pipeline (tries cache first, then downloads if token available)
+    pipeline = load_pipeline(hf_token)
 
     # Setup device
     device = get_best_device()
