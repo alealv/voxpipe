@@ -1,0 +1,3 @@
+[env]
+# Add the project's scripts/ dir to PATH (migrated from direnv `PATH_add scripts`)
+_.path = ["scripts"]
